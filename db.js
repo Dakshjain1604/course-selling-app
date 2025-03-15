@@ -1,5 +1,7 @@
+require("dotenv").config();
 const mongoose=require('mongoose');
-mongoose.connect("mongodb+srv://Daksh:uV23T7x5nDYGZMLE@cluster0.lo6gz.mongodb.net/courseSelling-app")
+
+mongoose.connect(process.env.DB_connection)
 const Schema=mongoose.Schema;
 const ObjectId=mongoose.ObjectId;
 

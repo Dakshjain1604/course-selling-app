@@ -1,13 +1,14 @@
+require('dotenv').config();
 const {Router}=require("express");
 const adminRouter=Router();
 
 const {adminModel, courseModel}=require("../db");
 const bcrypt=require("bcrypt")
 const jwt=require("jsonwebtoken");
-
+const {ADMIN_JWT_SECRET}=require("../config/config");
 const {adminMiddleware}=require("../middleware/admin");
 
-const { ADMIN_JWT_SECRET }=require("../config/config");
+
 
 adminRouter.post("/signup",async function(req,res){
    const {email,password,firstname,lastname}=req.body;
@@ -28,7 +29,7 @@ adminRouter.post("/signup",async function(req,res){
 
 });
 
-adminRouter.post("/signin",adminMiddleware,(req,res)=>{
+adminRouter.post("/signin",(req,res)=>{
     const email = req.body.email;
     const password = req.body.password;
 
@@ -64,16 +65,39 @@ adminRouter.post("/course",adminMiddleware,async function(req,res){
         price:price,
         creatorId:adminId
     })
+
+    res.json({
+        message:"course created",
+        courseId:course._id
+    }
+    )
 })
 adminRouter.put("/course",adminMiddleware,async function(req,res){
+    const adminId=req.userId;
+    const{title,description,imaheUrl,price,courseId}=req.body;
+
+    const course=await courseModel.updateOne({_id:courseId,creatorId:adminId},{
+        title:title,
+        description:description,
+        imaheUrl:imaheUrl,
+        price:price,
+        creatorId:adminId
+    })
     res.json({
-        message:"signup endpoint"
+        message:"course updated",
+        courseId:course._id
     })
 })
 
 adminRouter.post("course/bulk",adminMiddleware,async function(req,res){
+    const adminId=req.userId;
+
+    const courses=await courseModel.find({
+        creatorId:adminId
+    })
     res.json({
-        message:"signup endpoint"
+        message:"signup endpoint",
+        courses
     })
 })
 
