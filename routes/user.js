@@ -20,15 +20,15 @@ userRouter.post("/signup", async function (req, res) {
 });
 
 
-userRouter.post("/signin",userMiddleware, async function (req, res) {
+userRouter.post("/signin", async function (req, res) {
     const email = req.body.email;
     const password = req.body.password;
-    const currentUser = userModel.findOne({
+    const currentUser = userModel.find({
         email: email,
         password:password
     });
 
-    if(currentUser.length==1)
+    if(currentUser)
     {
         const token=jwt.sign({
             id:currentUser._id
@@ -52,8 +52,13 @@ userRouter.get("/purchases",userMiddleware,async function (req, res){
             userId,
         });
 
+        const courseData=await courseModel.find({
+            _id:{$in:purchases.map(x=>x.courseId)}
+        })
+
         res.json({
-            purchases
+            purchases,
+            courseData
         })
 
 })
