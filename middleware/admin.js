@@ -5,8 +5,8 @@ function adminMiddleware(req,res,next){
     const token=req.headers.token;
     const decoded=jwt.verify(token,ADMIN_JWT_SECRET);
     if(decoded){
-        req.userId=decoded.indexOf;
-        next();
+        req.userId=decoded.id;
+        next()
     }
     else{
         res.status(403).json({
@@ -16,5 +16,5 @@ function adminMiddleware(req,res,next){
 }
 
 module.exports={
-    adminMiddleware
+    adminMiddleware:adminMiddleware
 }

@@ -7,7 +7,7 @@ const bcrypt=require("bcrypt")
 const jwt=require("jsonwebtoken");
 const {ADMIN_JWT_SECRET}=require("../config/config");
 const {adminMiddleware}=require("../middleware/admin");
-
+// 67d56c2eb012f9e0e69f3d83
 
 
 adminRouter.post("/signup",async function(req,res){
@@ -29,30 +29,31 @@ adminRouter.post("/signup",async function(req,res){
 
 });
 
-adminRouter.post("/signin",(req,res)=>{
-    const email = req.body.email;
-    const password = req.body.password;
+adminRouter.post("/signin", async function(req, res) {
+    const { email, password} = req.body;
 
-    const admin = adminModel.findOne({
+    // TODO: ideally password should be hashed, and hence you cant compare the user provided password and the database password
+    const admin = await adminModel.find({
         email: email,
-        password:password
+        password: password
     });
+    console.log(admin);
+    if (admin) {
+        const token = jwt.sign({
+            id: admin._id
+        }, ADMIN_JWT_SECRET);
 
-    if(admin)
-    {
-        const token=jwt.sign({
-            id:admin._id
-        },ADMIN_JWT_SECRET);
-        res.json({  
-            token:token
+        // Do cookie logic
+
+        res.json({
+            token: token
         })
-    }
-    else{
+    } else {
         res.status(403).json({
-            message:"invalid creds"
+            message: "Incorrect credentials"
         })
     }
-})
+});
 
 adminRouter.post("/course",adminMiddleware,async function(req,res){
     const adminId=req.userId;
@@ -65,21 +66,22 @@ adminRouter.post("/course",adminMiddleware,async function(req,res){
         price:price,
         creatorId:adminId
     })
-
+    console.log(course);
     res.json({
         message:"course created",
         courseId:course._id
     }
     )
-})
+});
+
 adminRouter.put("/course",adminMiddleware,async function(req,res){
     const adminId=req.userId;
-    const{title,description,imaheUrl,price,courseId}=req.body;
+    const{title,description,imageUrl,price,courseId}=req.body;
 
     const course=await courseModel.updateOne({_id:courseId,creatorId:adminId},{
         title:title,
         description:description,
-        imaheUrl:imaheUrl,
+        imageUrl:imageUrl,
         price:price,
         creatorId:adminId
     })
@@ -89,14 +91,13 @@ adminRouter.put("/course",adminMiddleware,async function(req,res){
     })
 })
 
-adminRouter.post("course/bulk",adminMiddleware,async function(req,res){
+adminRouter.get("/course/bulk",adminMiddleware,async function(req,res){
     const adminId=req.userId;
-
-    const courses=await courseModel.find({
+    const courses=await courseModel.findOne({
         creatorId:adminId
-    })
+    }) 
     res.json({
-        message:"signup endpoint",
+        message:"here is a list of your courses",
         courses
     })
 })

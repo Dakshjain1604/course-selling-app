@@ -6,7 +6,7 @@ function userMiddleware(req,res,next){
     const decoded=jwt.verify(token,USER_JWT);
 
     if(decoded){
-        req.userId=decoded.indexOf;
+        req.userId=decoded.id;
         next();
     }
     else{
@@ -18,5 +18,5 @@ function userMiddleware(req,res,next){
 }
 
 module.exports={
-    userMiddleware
+    userMiddleware:userMiddleware
 }
